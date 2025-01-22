@@ -17,6 +17,7 @@
  */
 package org.apache.cassandra.config;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,7 @@ import org.apache.cassandra.utils.Shared;
 import static org.apache.cassandra.utils.Shared.Scope.SIMULATION;
 
 @Shared(scope = SIMULATION)
-public class ParameterizedClass
+public class ParameterizedClass implements Serializable
 {
     public static final String CLASS_NAME = "class_name";
     public static final String PARAMETERS = "parameters";

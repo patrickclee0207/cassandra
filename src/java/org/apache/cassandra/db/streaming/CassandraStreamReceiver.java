@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.cassandra.io.sstable.SSTable;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.ColumnFamilyStore;
 import org.apache.cassandra.db.Keyspace;
@@ -43,7 +44,6 @@ import org.apache.cassandra.db.view.View;
 import org.apache.cassandra.dht.Bounds;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.io.sstable.ISSTableScanner;
-import org.apache.cassandra.io.sstable.SSTable;
 import org.apache.cassandra.io.sstable.SSTableMultiWriter;
 import org.apache.cassandra.io.sstable.format.SSTableReader;
 import org.apache.cassandra.streaming.IncomingStream;
@@ -72,7 +72,7 @@ public class CassandraStreamReceiver implements StreamReceiver
 
     protected volatile boolean receivedEntireSSTable;
 
-    private final boolean requiresWritePath;
+    public final boolean requiresWritePath;
 
 
     public CassandraStreamReceiver(ColumnFamilyStore cfs, StreamSession session, int totalFiles)
@@ -190,11 +190,11 @@ public class CassandraStreamReceiver implements StreamReceiver
      * For CDC-enabled tables and write path for CDC is enabled, we want to ensure that the mutations are
      * run through the CommitLog, so they can be archived by the CDC process on discard.
      */
-    private boolean requiresWritePath(ColumnFamilyStore cfs)
+    public boolean requiresWritePath(ColumnFamilyStore cfs)
     {
         return cdcRequiresWriteCommitLog(cfs)
                || cfs.streamToMemtable()
-               || (session.streamOperation().requiresViewBuild() && hasViews(cfs));
+               || (session.streamOperation().requiresViewBuild() && hasViews(cfs) && DatabaseDescriptor.isMaterializedViewsOnRepairEnabled());
     }
 
     private void sendThroughWritePath(ColumnFamilyStore cfs, Collection<SSTableReader> readers)

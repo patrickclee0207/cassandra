@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import org.apache.cassandra.distributed.shared.WithProperties;
+import org.apache.cassandra.repair.autorepair.AutoRepairConfig;
 import org.apache.cassandra.io.util.File;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -271,6 +272,10 @@ public class YamlConfigurationLoaderTest
         Map<String,Object> encryptionOptions = ImmutableMap.of("cipher_suites", Collections.singletonList("FakeCipher"),
                                                                "optional", false,
                                                                "enabled", true);
+        Map<String, Object> autoRepairConfig = ImmutableMap.of("enabled", true,
+                                                               "global_settings", ImmutableMap.of("number_of_repair_threads",
+                                                                                                  1),
+                                                               "repair_type_overrides", ImmutableMap.of("full", ImmutableMap.of("number_of_repair_threads",2)));
         Map<String,Object> map = new ImmutableMap.Builder<String, Object>()
                                  .put("storage_port", storagePort)
                                  .put("commitlog_sync", commitLogSync)
@@ -279,6 +284,7 @@ public class YamlConfigurationLoaderTest
                                  .put("internode_socket_send_buffer_size", "5B")
                                  .put("internode_socket_receive_buffer_size", "5B")
                                  .put("commitlog_sync_group_window_in_ms", "42")
+                                 .put("auto_repair", autoRepairConfig)
                                  .build();
 
         Config config = YamlConfigurationLoader.fromMap(map, Config.class);
@@ -289,6 +295,9 @@ public class YamlConfigurationLoaderTest
         assertEquals(true, config.client_encryption_options.enabled); // Check a nested object
         assertEquals(new DataStorageSpec.IntBytesBound("5B"), config.internode_socket_send_buffer_size); // Check names backward compatibility (CASSANDRA-17141 and CASSANDRA-15234)
         assertEquals(new DataStorageSpec.IntBytesBound("5B"), config.internode_socket_receive_buffer_size); // Check names backward compatibility (CASSANDRA-17141 and CASSANDRA-15234)
+        assertEquals(true, config.auto_repair.enabled);
+        assertEquals(new DurationSpec.IntSecondsBound("6h"), config.auto_repair.getAutoRepairTableMaxRepairTime(AutoRepairConfig.RepairType.INCREMENTAL));
+        config.auto_repair.setMVRepairEnabled(AutoRepairConfig.RepairType.INCREMENTAL, false);
     }
 
     @Test

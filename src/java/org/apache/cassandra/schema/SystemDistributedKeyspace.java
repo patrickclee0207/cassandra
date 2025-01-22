@@ -84,7 +84,7 @@ public final class SystemDistributedKeyspace
      * gen 5: add ttl and TWCS to repair_history tables
      * gen 6: add denylist table
      */
-    public static final long GENERATION = 6;
+    public static final long GENERATION = 7;
 
     public static final String REPAIR_HISTORY = "repair_history";
 
@@ -94,7 +94,11 @@ public final class SystemDistributedKeyspace
 
     public static final String PARTITION_DENYLIST_TABLE = "partition_denylist";
 
-    public static final Set<String> TABLE_NAMES = ImmutableSet.of(REPAIR_HISTORY, PARENT_REPAIR_HISTORY, VIEW_BUILD_STATUS, PARTITION_DENYLIST_TABLE);
+    public static final String AUTO_REPAIR_HISTORY = "auto_repair_history";
+
+    public static final String AUTO_REPAIR_PRIORITY = "auto_repair_priority";
+
+    public static final Set<String> TABLE_NAMES = ImmutableSet.of(REPAIR_HISTORY, PARENT_REPAIR_HISTORY, VIEW_BUILD_STATUS, PARTITION_DENYLIST_TABLE, AUTO_REPAIR_HISTORY, AUTO_REPAIR_PRIORITY);
     
     private static final TableMetadata RepairHistory =
         parse(REPAIR_HISTORY,
@@ -161,6 +165,28 @@ public final class SystemDistributedKeyspace
           + "PRIMARY KEY ((ks_name, table_name), key))")
     .build();
 
+    public static final String AUTO_REPAIR_HISTORY_CQL = "CREATE TABLE IF NOT EXISTS %s ("
+        + "host_id uuid,"
+        + "repair_type text,"
+        + "repair_turn text,"
+        + "repair_start_ts timestamp,"
+        + "repair_finish_ts timestamp,"
+        + "delete_hosts set<uuid>,"
+        + "delete_hosts_update_time timestamp,"
+        + "force_repair boolean,"
+        + "PRIMARY KEY (repair_type, host_id))";
+
+    private static final TableMetadata AutoRepairHistoryTable =
+        parse(AUTO_REPAIR_HISTORY, "Auto repair history for each node", AUTO_REPAIR_HISTORY_CQL).build();
+
+    public static final String AUTO_REPAIR_PRIORITY_CQL =  "CREATE TABLE IF NOT EXISTS %s ("
+        + "repair_type text,"
+        + "repair_priority set<uuid>,"
+        + "PRIMARY KEY (repair_type))";
+
+    private static final TableMetadata AutoRepairPriorityTable =
+        parse(AUTO_REPAIR_PRIORITY, "Auto repair priority for each group", AUTO_REPAIR_PRIORITY_CQL).build();
+
     private static TableMetadata.Builder parse(String table, String description, String cql)
     {
         return CreateTableStatement.parse(format(cql, table), SchemaConstants.DISTRIBUTED_KEYSPACE_NAME)
@@ -170,7 +196,7 @@ public final class SystemDistributedKeyspace
 
     public static KeyspaceMetadata metadata()
     {
-        return KeyspaceMetadata.create(SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, KeyspaceParams.simple(Math.max(DEFAULT_RF, DatabaseDescriptor.getDefaultKeyspaceRF())), Tables.of(RepairHistory, ParentRepairHistory, ViewBuildStatus, PartitionDenylistTable));
+        return KeyspaceMetadata.create(SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, KeyspaceParams.simple(Math.max(DEFAULT_RF, DatabaseDescriptor.getDefaultKeyspaceRF())), Tables.of(RepairHistory, ParentRepairHistory, ViewBuildStatus, PartitionDenylistTable, AutoRepairHistoryTable, AutoRepairPriorityTable));
     }
 
     public static void startParentRepair(TimeUUID parent_id, String keyspaceName, String[] cfnames, RepairOption options)

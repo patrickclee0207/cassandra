@@ -17,6 +17,7 @@
  */
 package org.apache.cassandra.config;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -34,7 +35,7 @@ import static org.apache.cassandra.config.DataStorageSpec.DataStorageUnit.MEBIBY
  * users the opportunity to be able to provide config with a unit of their choice in cassandra.yaml as per the available
  * options. (CASSANDRA-15234)
  */
-public abstract class DataStorageSpec
+public abstract class DataStorageSpec implements Serializable
 {
     /**
      * The Regexp used to parse the storage provided as String.
