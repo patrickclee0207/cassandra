@@ -57,27 +57,27 @@ public class AutoRepairSchedulerTest extends TestBaseImpl
     sdf = new SimpleDateFormat(pattern);
     sdf.setLenient(false);
     cluster = Cluster.build(3).withConfig(config -> config
-        .set("auto_repair",
-            ImmutableMap.of(
-                "repair_type_overrides",
-                ImmutableMap.of(AutoRepairConfig.RepairType.FULL.getConfigName(),
-                    ImmutableMap.of(
-                        "initial_scheduler_delay", "5s",
-                        "enabled", "true",
-                        "parallel_repair_count", "1",
-                        "parallel_repair_percentage", "0",
-                        "min_repair_interval", "1s"),
-                    AutoRepairConfig.RepairType.INCREMENTAL.getConfigName(),
-                    ImmutableMap.of(
-                        "initial_scheduler_delay", "5s",
-                        "enabled", "true",
-                        "parallel_repair_count", "1",
-                        "parallel_repair_percentage", "0",
-                        "min_repair_interval", "1s"))))
-        .set("auto_repair.enabled", "true")
-        .set("auto_repair.global_settings.repair_by_keyspace", "true")
-        .set("auto_repair.repair_task_min_duration", "0s")
-        .set("auto_repair.repair_check_interval", "10s")).start();
+                                                    .set("auto_repair",
+                                                         ImmutableMap.of(
+                                                         "repair_type_overrides",
+                                                         ImmutableMap.of(AutoRepairConfig.RepairType.FULL.getConfigName(),
+                                                                         ImmutableMap.of(
+                                                                         "initial_scheduler_delay", "5s",
+                                                                         "enabled", "true",
+                                                                         "parallel_repair_count", "1",
+                                                                         "parallel_repair_percentage", "0",
+                                                                         "min_repair_interval", "1s"),
+                                                                         AutoRepairConfig.RepairType.INCREMENTAL.getConfigName(),
+                                                                         ImmutableMap.of(
+                                                                         "initial_scheduler_delay", "5s",
+                                                                         "enabled", "true",
+                                                                         "parallel_repair_count", "1",
+                                                                         "parallel_repair_percentage", "0",
+                                                                         "min_repair_interval", "1s"))))
+                                                    .set("auto_repair.enabled", "true")
+                                                    .set("auto_repair.global_settings.repair_by_keyspace", "true")
+                                                    .set("auto_repair.repair_task_min_duration", "0s")
+                                                    .set("auto_repair.repair_check_interval", "10s")).start();
 
     cluster.schemaChange("CREATE KEYSPACE IF NOT EXISTS " + KEYSPACE + " WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};");
     cluster.schemaChange(withKeyspace("CREATE TABLE %s.tbl (pk int, ck text, v1 int, v2 int, PRIMARY KEY (pk, ck)) WITH read_repair='NONE'"));

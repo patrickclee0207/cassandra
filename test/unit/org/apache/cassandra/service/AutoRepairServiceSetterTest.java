@@ -66,24 +66,24 @@ public class AutoRepairServiceSetterTest<T> extends CQLTester {
   public static Collection<Object[]> testCases() {
     DatabaseDescriptor.setConfig(DatabaseDescriptor.loadConfig());
     return Stream.of(
-        forEachRepairType(true, AutoRepairService.instance::setAutoRepairEnabled, config::isAutoRepairEnabled),
-        forEachRepairType(100, AutoRepairService.instance::setRepairThreads, config::getRepairThreads),
-        forEachRepairType(400, AutoRepairService.instance::setRepairSSTableCountHigherThreshold, config::getRepairSSTableCountHigherThreshold),
-        forEachRepairType(ImmutableSet.of("dc1", "dc2"), AutoRepairService.instance::setIgnoreDCs, config::getIgnoreDCs),
-        forEachRepairType(true, AutoRepairService.instance::setPrimaryTokenRangeOnly, config::getRepairPrimaryTokenRangeOnly),
-        forEachRepairType(600, AutoRepairService.instance::setParallelRepairPercentage, config::getParallelRepairPercentage),
-        forEachRepairType(700, AutoRepairService.instance::setParallelRepairCount, config::getParallelRepairCount),
-        forEachRepairType(true, AutoRepairService.instance::setMVRepairEnabled, config::getMVRepairEnabled),
-        forEachRepairType(ImmutableSet.of(InetAddressAndPort.getLocalHost()), AutoRepairService.instance::setRepairPriorityForHosts, AutoRepairUtils::getPriorityHosts),
-        forEachRepairType(ImmutableSet.of(InetAddressAndPort.getLocalHost()), AutoRepairService.instance::setForceRepairForHosts, AutoRepairServiceSetterTest::isLocalHostForceRepair)
+    forEachRepairType(true, AutoRepairService.instance::setAutoRepairEnabled, config::isAutoRepairEnabled),
+    forEachRepairType(100, AutoRepairService.instance::setRepairThreads, config::getRepairThreads),
+    forEachRepairType(400, AutoRepairService.instance::setRepairSSTableCountHigherThreshold, config::getRepairSSTableCountHigherThreshold),
+    forEachRepairType(ImmutableSet.of("dc1", "dc2"), AutoRepairService.instance::setIgnoreDCs, config::getIgnoreDCs),
+    forEachRepairType(true, AutoRepairService.instance::setPrimaryTokenRangeOnly, config::getRepairPrimaryTokenRangeOnly),
+    forEachRepairType(600, AutoRepairService.instance::setParallelRepairPercentage, config::getParallelRepairPercentage),
+    forEachRepairType(700, AutoRepairService.instance::setParallelRepairCount, config::getParallelRepairCount),
+    forEachRepairType(true, AutoRepairService.instance::setMVRepairEnabled, config::getMaterializedViewRepairEnabled),
+    forEachRepairType(ImmutableSet.of(InetAddressAndPort.getLocalHost()), AutoRepairService.instance::setRepairPriorityForHosts, AutoRepairUtils::getPriorityHosts),
+    forEachRepairType(ImmutableSet.of(InetAddressAndPort.getLocalHost()), AutoRepairService.instance::setForceRepairForHosts, AutoRepairServiceSetterTest::isLocalHostForceRepair)
     ).flatMap(Function.identity()).collect(Collectors.toList());
   }
 
   private static Set<InetAddressAndPort> isLocalHostForceRepair(AutoRepairConfig.RepairType type) {
     UUID hostId = StorageService.instance.getHostIdForEndpoint(InetAddressAndPort.getLocalHost());
     UntypedResultSet resultSet = QueryProcessor.executeInternal(String.format(
-        "SELECT force_repair FROM %s.%s WHERE host_id = %s and repair_type = '%s'",
-        SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_HISTORY, hostId, type));
+    "SELECT force_repair FROM %s.%s WHERE host_id = %s and repair_type = '%s'",
+    SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_HISTORY, hostId, type));
 
     if (!resultSet.isEmpty() && resultSet.one().getBoolean("force_repair")) {
       return ImmutableSet.of(InetAddressAndPort.getLocalHost());
@@ -114,11 +114,11 @@ public class AutoRepairServiceSetterTest<T> extends CQLTester {
   @Before
   public void prepare() {
     QueryProcessor.executeInternal(String.format(
-        "TRUNCATE %s.%s",
-        SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_HISTORY));
+    "TRUNCATE %s.%s",
+    SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_HISTORY));
     QueryProcessor.executeInternal(String.format(
-        "TRUNCATE %s.%s",
-        SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_PRIORITY));
+    "TRUNCATE %s.%s",
+    SchemaConstants.DISTRIBUTED_KEYSPACE_NAME, SystemDistributedKeyspace.AUTO_REPAIR_PRIORITY));
   }
 
   @Test

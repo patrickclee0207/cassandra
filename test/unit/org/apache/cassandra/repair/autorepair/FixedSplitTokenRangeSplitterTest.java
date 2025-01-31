@@ -101,7 +101,7 @@ public class FixedSplitTokenRangeSplitterTest extends CQLTester
     List<PrioritizedRepairPlan> plan = PrioritizedRepairPlan.buildSingleKeyspacePlan(repairType, KEYSPACE, TABLE1, TABLE2, TABLE3);
 
     Iterator<KeyspaceRepairAssignments> keyspaceAssignments = new FixedSplitTokenRangeSplitter(repairType, splitterParams)
-        .getRepairAssignments(true, plan);
+                                                              .getRepairAssignments(true, plan);
 
     // should be only 1 entry for the keyspace.
     assertTrue(keyspaceAssignments.hasNext());
@@ -152,7 +152,7 @@ public class FixedSplitTokenRangeSplitterTest extends CQLTester
     List<PrioritizedRepairPlan> plan = PrioritizedRepairPlan.buildSingleKeyspacePlan(repairType, KEYSPACE, TABLE1, TABLE2, TABLE3);
 
     Iterator<KeyspaceRepairAssignments> keyspaceAssignments = new FixedSplitTokenRangeSplitter(repairType, splitterParams)
-        .getRepairAssignments(true, plan);
+                                                              .getRepairAssignments(true, plan);
 
     // should be only 1 entry for the keyspace.
     assertTrue(keyspaceAssignments.hasNext());

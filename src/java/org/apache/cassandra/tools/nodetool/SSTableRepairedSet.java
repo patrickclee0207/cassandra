@@ -38,18 +38,18 @@ public class SSTableRepairedSet extends NodeTool.NodeToolCmd
   protected List<String> args = new ArrayList<>();
 
   @Option(title = "really-set",
-      name = { "--really-set" },
-      description = "Really set the repaired state of SSTables. If not set, only print SSTables that would be affected.")
+  name = { "--really-set" },
+  description = "Really set the repaired state of SSTables. If not set, only print SSTables that would be affected.")
   protected boolean reallySet = false;
 
   @Option(title = "is-repaired",
-      name = { "--is-repaired" },
-      description = "Set SSTables to repaired state.")
+  name = { "--is-repaired" },
+  description = "Set SSTables to repaired state.")
   protected boolean isRepaired = false;
 
   @Option(title = "is-unrepaired",
-      name = { "--is-unrepaired" },
-      description = "Set SSTables to unrepaired state.")
+  name = { "--is-unrepaired" },
+  description = "Set SSTables to unrepaired state.")
   protected boolean isUnrepaired = false;
 
   @Override
@@ -76,7 +76,7 @@ public class SSTableRepairedSet extends NodeTool.NodeToolCmd
       message += " all keyspaces";
     else
       message += tables.isEmpty() ? " all tables" : " tables " + String.join(", ", tables)
-          + " in keyspace " + keyspaces.get(0);
+                                                    + " in keyspace " + keyspaces.get(0);
     message += " to " + (isRepaired ? "repaired" : "unrepaired");
     out.println(message);
 
@@ -86,9 +86,9 @@ public class SSTableRepairedSet extends NodeTool.NodeToolCmd
       try
       {
         sstableList.addAll(probe.mutateSSTableRepairedState(isRepaired, !reallySet, keyspace,
-            tables.isEmpty()
-                ? probe.getTablesForKeyspace(keyspace) // mutate all tables
-                : tables)); // mutate specific tables
+                                                            tables.isEmpty()
+                                                            ? probe.getTablesForKeyspace(keyspace) // mutate all tables
+                                                            : tables)); // mutate specific tables
       }
       catch (InvalidRequestException e)
       {

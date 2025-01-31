@@ -949,13 +949,14 @@ public class Config
     public volatile DurationSpec.LongNanosecondsBound repair_state_expires = new DurationSpec.LongNanosecondsBound("3d");
     public volatile int repair_state_size = 100_000;
 
+    public volatile AutoRepairConfig auto_repair = new AutoRepairConfig();
+
     /** The configuration of timestamp bounds */
     public volatile DurationSpec.LongMicrosecondsBound maximum_timestamp_warn_threshold = null;
     public volatile DurationSpec.LongMicrosecondsBound maximum_timestamp_fail_threshold = null;
     public volatile DurationSpec.LongMicrosecondsBound minimum_timestamp_warn_threshold = null;
     public volatile DurationSpec.LongMicrosecondsBound minimum_timestamp_fail_threshold = null;
 
-    public volatile AutoRepairConfig auto_repair = new AutoRepairConfig();
     /**
      * The variants of paxos implementation and semantics supported by Cassandra.
      */

@@ -31,6 +31,7 @@ import static org.apache.cassandra.metrics.CassandraMetricsRegistry.Metrics;
  */
 public class AutoRepairMetrics
 {
+  public static final String TYPE_NAME = "autorepair";
   public Gauge<Integer> repairsInProgress;
   public Gauge<Integer> nodeRepairTimeInSec;
   public Gauge<Integer> clusterRepairTimeInSec;
@@ -178,7 +179,7 @@ public class AutoRepairMetrics
       scope.append("repairType=").append(repairType);
 
       return new CassandraMetricsRegistry.MetricName(DefaultNameFactory.GROUP_NAME, TYPE.toLowerCase(),
-          metricName, scope.toString(), mbeanName.toString());
+                                                     metricName, scope.toString(), mbeanName.toString());
     }
   }
 }

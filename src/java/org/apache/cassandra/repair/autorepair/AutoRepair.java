@@ -126,10 +126,10 @@ public class AutoRepair
           AutoRepairService.instance.checkCanRun(repairType);
 
         repairExecutors.get(repairType).scheduleWithFixedDelay(
-            () -> repair(repairType),
-            config.getInitialSchedulerDelay(repairType).toSeconds(),
-            config.getRepairCheckInterval().toSeconds(),
-            TimeUnit.SECONDS);
+        () -> repair(repairType),
+        config.getInitialSchedulerDelay(repairType).toSeconds(),
+        config.getRepairCheckInterval().toSeconds(),
+        TimeUnit.SECONDS);
       }
       isSetupDone = true;
     }
@@ -179,7 +179,7 @@ public class AutoRepair
         // without -pr. We may also do force repair for certain node that we want to repair all the data on one node
         // When doing force repair, we want to repair without -pr.
         boolean primaryRangeOnly = config.getRepairPrimaryTokenRangeOnly(repairType)
-            && turn != MY_TURN_FORCE_REPAIR;
+                                   && turn != MY_TURN_FORCE_REPAIR;
         if (tooSoonToRunRepair(repairType, repairState, config, myId))
         {
           return;
@@ -187,7 +187,7 @@ public class AutoRepair
 
         long startTime = timeFunc.get();
         logger.info("My host id: {}, my turn to run repair...repair primary-ranges only? {}", myId,
-            config.getRepairPrimaryTokenRangeOnly(repairType));
+                    config.getRepairPrimaryTokenRangeOnly(repairType));
         AutoRepairUtils.updateStartAutoRepairHistory(repairType, myId, timeFunc.get(), turn);
 
         repairState.setRepairKeyspaceCount(0);
@@ -281,21 +281,21 @@ public class AutoRepair
         {
           collectedRepairStats.skippedTokenRanges += totalRepairAssignments - totalProcessedAssignments;
           logger.info("Keyspace took too much time to repair hence skipping it {}",
-              keyspaceName);
+                      keyspaceName);
           break;
         }
         if (repairOneTableAtATime && AutoRepairUtils.tableMaxRepairTimeExceeded(repairType, tableStartTime))
         {
           collectedRepairStats.skippedTokenRanges += 1;
           logger.info("Table took too much time to repair hence skipping it table name {}.{}, token range {}",
-              keyspaceName, curRepairAssignment.tableNames, curRepairAssignment.tokenRange);
+                      keyspaceName, curRepairAssignment.tableNames, curRepairAssignment.tokenRange);
           continue;
         }
 
         Range<Token> tokenRange = curRepairAssignment.getTokenRange();
         logger.debug("Current Token Left side {}, right side {}",
-            tokenRange.left.toString(),
-            tokenRange.right.toString());
+                     tokenRange.left.toString(),
+                     tokenRange.right.toString());
 
         ranges.add(curRepairAssignment.getTokenRange());
         if ((totalProcessedAssignments % config.getRepairThreads(repairType) == 0) ||
@@ -306,8 +306,8 @@ public class AutoRepair
           while (retryCount <= config.getRepairMaxRetries())
           {
             RepairCoordinator task = repairState.getRepairRunnable(keyspaceName,
-                Lists.newArrayList(curRepairAssignment.getTableNames()),
-                ranges, primaryRangeOnly);
+                                                                   Lists.newArrayList(curRepairAssignment.getTableNames()),
+                                                                   ranges, primaryRangeOnly);
             repairState.resetWaitCondition();
             f = repairRunnableExecutors.get(repairType).submit(task);
             try
@@ -328,9 +328,9 @@ public class AutoRepair
             {
               boolean cancellationStatus = f.cancel(true);
               logger.warn("Repair failed for range {}-{} for {} tables {} with cancellationStatus: {} retrying after {} seconds...",
-                  tokenRange.left, tokenRange.right,
-                  keyspaceName, curRepairAssignment.getTableNames(),
-                  cancellationStatus, config.getRepairRetryBackoff().toSeconds());
+                          tokenRange.left, tokenRange.right,
+                          keyspaceName, curRepairAssignment.getTableNames(),
+                          cancellationStatus, config.getRepairRetryBackoff().toSeconds());
               sleepFunc.accept(config.getRepairRetryBackoff().toSeconds(), TimeUnit.SECONDS);
             }
             retryCount++;
@@ -339,8 +339,8 @@ public class AutoRepair
           if (repairState.isSuccess())
           {
             logger.info("Repair completed for range {}-{} for {} tables {}, total assignments: {}," +
-                    "processed assignments: {}", tokenRange.left, tokenRange.right,
-                keyspaceName, curRepairAssignment.getTableNames(), totalRepairAssignments, totalProcessedAssignments);
+                        "processed assignments: {}", tokenRange.left, tokenRange.right,
+                        keyspaceName, curRepairAssignment.getTableNames(), totalRepairAssignments, totalProcessedAssignments);
             collectedRepairStats.succeededTokenRanges += ranges.size();
           }
           else
@@ -352,8 +352,8 @@ public class AutoRepair
             }
             //in the future we can add retry, etc.
             logger.error("Repair failed for range {}-{} for {} tables {} after {} retries, total assignments: {}," +
-                    "processed assignments: {}, cancellationStatus: {}", tokenRange.left, tokenRange.right, keyspaceName,
-                curRepairAssignment.getTableNames(), retryCount, totalRepairAssignments, totalProcessedAssignments, cancellationStatus);
+                         "processed assignments: {}, cancellationStatus: {}", tokenRange.left, tokenRange.right, keyspaceName,
+                         curRepairAssignment.getTableNames(), retryCount, totalRepairAssignments, totalProcessedAssignments, cancellationStatus);
             collectedRepairStats.failedTokenRanges += ranges.size();
           }
           ranges.clear();
@@ -383,7 +383,7 @@ public class AutoRepair
     if (timeElapsedSinceLastRepair < config.getRepairMinInterval(repairType).toSeconds())
     {
       logger.info("Too soon to run repair, last repair was done {} seconds ago",
-          timeElapsedSinceLastRepair);
+                  timeElapsedSinceLastRepair);
       return true;
     }
     return false;
@@ -415,7 +415,7 @@ public class AutoRepair
       if (totalSSTables > config.getRepairSSTableCountHigherThreshold(repairType))
       {
         logger.info("Too many SSTables for repair for table {}.{}" +
-            "totalSSTables {}", keyspace.getName(), tableName, totalSSTables);
+                    "totalSSTables {}", keyspace.getName(), tableName, totalSSTables);
         collectedRepairStats.skippedTables++;
         continue;
       }
@@ -450,16 +450,16 @@ public class AutoRepair
     repairState.setNodeRepairTimeInSec((int) TimeUnit.MILLISECONDS.toSeconds(timeFunc.get() - startTime));
     long timeInHours = TimeUnit.SECONDS.toHours(repairState.getNodeRepairTimeInSec());
     logger.info("Local {} repair time {} hour(s), stats: repairKeyspaceCount {}, " +
-            "repairTokenRangesSuccessCount {}, repairTokenRangesFailureCount {}, " +
-            "repairTokenRangesSkipCount {}, repairTablesSkipCount {}", repairType, timeInHours, repairState.getRepairKeyspaceCount(),
-        repairState.getSucceededTokenRangesCount(), repairState.getFailedTokenRangesCount(),
-        repairState.getSkippedTokenRangesCount(), repairState.getSkippedTablesCount());
+                "repairTokenRangesSuccessCount {}, repairTokenRangesFailureCount {}, " +
+                "repairTokenRangesSkipCount {}, repairTablesSkipCount {}", repairType, timeInHours, repairState.getRepairKeyspaceCount(),
+                repairState.getSucceededTokenRangesCount(), repairState.getFailedTokenRangesCount(),
+                repairState.getSkippedTokenRangesCount(), repairState.getSkippedTablesCount());
     if (repairState.getLastRepairTime() != 0)
     {
       repairState.setClusterRepairTimeInSec((int) TimeUnit.MILLISECONDS.toSeconds(timeFunc.get() -
-          repairState.getLastRepairTime()));
+                                                                                  repairState.getLastRepairTime()));
       logger.info("Cluster repair time for repair type {}: {} day(s)", repairType,
-          TimeUnit.SECONDS.toDays(repairState.getClusterRepairTimeInSec()));
+                  TimeUnit.SECONDS.toDays(repairState.getClusterRepairTimeInSec()));
     }
     repairState.setLastRepairTime(timeFunc.get());
     if (timeInHours == 0 && SLEEP_IF_REPAIR_FINISHES_QUICKLY.toSeconds() > 0)

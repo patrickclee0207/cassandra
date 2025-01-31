@@ -72,9 +72,9 @@ public class AutoRepairTest extends CQLTester
     for (RepairType repairType : instance.repairExecutors.keySet())
     {
       int expectedTasks = instance.repairExecutors.get(repairType).getPendingTaskCount()
-          + instance.repairExecutors.get(repairType).getActiveTaskCount();
+                          + instance.repairExecutors.get(repairType).getActiveTaskCount();
       assertTrue(String.format("Expected > 0 task in queue for %s but was %s", repairType, expectedTasks),
-          expectedTasks > 0);
+                 expectedTasks > 0);
     }
   }
 
@@ -92,9 +92,9 @@ public class AutoRepairTest extends CQLTester
     for (RepairType repairType : instance.repairExecutors.keySet())
     {
       int expectedTasks = instance.repairExecutors.get(repairType).getPendingTaskCount()
-          + instance.repairExecutors.get(repairType).getActiveTaskCount();
+                          + instance.repairExecutors.get(repairType).getActiveTaskCount();
       assertTrue(String.format("Expected > 0 task in queue for %s but was %s", repairType, expectedTasks),
-          expectedTasks > 0);
+                 expectedTasks > 0);
     }
   }
 
@@ -110,10 +110,22 @@ public class AutoRepairTest extends CQLTester
     instance.setup();
   }
 
+  @Test
+  public void testNoFailureIfMVRepairOnButConfigIsOff()
+  {
+    DatabaseDescriptor.getAutoRepairConfig().setAutoRepairEnabled(RepairType.INCREMENTAL, true);
+    DatabaseDescriptor.getAutoRepairConfig().setMaterializedViewRepairEnabled(RepairType.INCREMENTAL, false);
+    DatabaseDescriptor.setCDCOnRepairEnabled(false);
+    DatabaseDescriptor.setMaterializedViewsOnRepairEnabled(true);
+    AutoRepair instance = new AutoRepair();
+    instance.setup();
+  }
+
   @Test(expected = ConfigurationException.class)
   public void testSetupFailsWhenIREnabledWithMVReplay()
   {
     DatabaseDescriptor.getAutoRepairConfig().setAutoRepairEnabled(RepairType.INCREMENTAL, true);
+    DatabaseDescriptor.getAutoRepairConfig().setMaterializedViewRepairEnabled(RepairType.INCREMENTAL, true);
     DatabaseDescriptor.setCDCOnRepairEnabled(false);
     DatabaseDescriptor.setMaterializedViewsOnRepairEnabled(true);
     AutoRepair instance = new AutoRepair();

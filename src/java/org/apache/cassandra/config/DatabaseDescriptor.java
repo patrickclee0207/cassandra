@@ -5288,6 +5288,12 @@ public class DatabaseDescriptor
     }
 
     @VisibleForTesting
+    public static void setPartitioner(String name)
+    {
+        partitioner = FBUtilities.newPartitioner(name);
+    }
+
+    @VisibleForTesting
     public static void setInitialTokens(String initial_token)
     {
         conf.initial_token = initial_token;

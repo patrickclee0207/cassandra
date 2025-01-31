@@ -111,7 +111,7 @@ public abstract class AutoRepairState implements ProgressListener
   protected RepairCoordinator getRepairRunnable(String keyspace, RepairOption options)
   {
     RepairCoordinator task = new RepairCoordinator(StorageService.instance, StorageService.nextRepairCommand.incrementAndGet(),
-        options, keyspace);
+                                                   options, keyspace);
 
     task.addProgressListener(this);
 
@@ -311,8 +311,8 @@ class PreviewRepairedState extends AutoRepairState
   public RepairCoordinator getRepairRunnable(String keyspace, List<String> tables, Set<Range<Token>> ranges, boolean primaryRangeOnly)
   {
     RepairOption option = new RepairOption(RepairParallelism.PARALLEL, primaryRangeOnly, false, false,
-        AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
-        !ranges.isEmpty(), false, false, PreviewKind.REPAIRED, false, true, false, false);
+                                           AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
+                                           !ranges.isEmpty(), false, false, PreviewKind.REPAIRED, false, true, false, false);
 
     option.getColumnFamilies().addAll(tables);
 
@@ -331,8 +331,8 @@ class IncrementalRepairState extends AutoRepairState
   public RepairCoordinator getRepairRunnable(String keyspace, List<String> tables, Set<Range<Token>> ranges, boolean primaryRangeOnly)
   {
     RepairOption option = new RepairOption(RepairParallelism.PARALLEL, primaryRangeOnly, true, false,
-        AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
-        !ranges.isEmpty(), false, false, PreviewKind.NONE, true, true, false, false);
+                                           AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
+                                           !ranges.isEmpty(), false, false, PreviewKind.NONE, true, true, false, false);
 
     option.getColumnFamilies().addAll(filterOutUnsafeTables(keyspace, tables));
 
@@ -345,23 +345,23 @@ class IncrementalRepairState extends AutoRepairState
     Keyspace keyspace = Keyspace.open(keyspaceName);
 
     return tables.stream()
-        .filter(table -> {
-          ColumnFamilyStore cfs = keyspace.getColumnFamilyStore(table);
-          TableViews views = keyspace.viewManager.forTable(cfs.metadata().id);
-          if (views != null && !views.isEmpty())
-          {
-            logger.debug("Skipping incremental repair for {}.{} as it has materialized views", keyspaceName, table);
-            return false;
-          }
+                 .filter(table -> {
+                   ColumnFamilyStore cfs = keyspace.getColumnFamilyStore(table);
+                   TableViews views = keyspace.viewManager.forTable(cfs.metadata().id);
+                   if (views != null && !views.isEmpty())
+                   {
+                     logger.debug("Skipping incremental repair for {}.{} as it has materialized views", keyspaceName, table);
+                     return false;
+                   }
 
-          if (cfs.metadata().params != null && cfs.metadata().params.cdc)
-          {
-            logger.debug("Skipping incremental repair for {}.{} as it has CDC enabled", keyspaceName, table);
-            return false;
-          }
+                   if (cfs.metadata().params != null && cfs.metadata().params.cdc)
+                   {
+                     logger.debug("Skipping incremental repair for {}.{} as it has CDC enabled", keyspaceName, table);
+                     return false;
+                   }
 
-          return true;
-        }).collect(Collectors.toList());
+                   return true;
+                 }).collect(Collectors.toList());
   }
 }
 
@@ -376,8 +376,8 @@ class FullRepairState extends AutoRepairState
   public RepairCoordinator getRepairRunnable(String keyspace, List<String> tables, Set<Range<Token>> ranges, boolean primaryRangeOnly)
   {
     RepairOption option = new RepairOption(RepairParallelism.PARALLEL, primaryRangeOnly, false, false,
-        AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
-        !ranges.isEmpty(), false, false, PreviewKind.NONE, true, true, false, false);
+                                           AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
+                                           !ranges.isEmpty(), false, false, PreviewKind.NONE, true, true, false, false);
 
     option.getColumnFamilies().addAll(tables);
 
