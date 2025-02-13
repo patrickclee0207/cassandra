@@ -37,7 +37,6 @@ import com.google.common.collect.Lists;
 import org.apache.cassandra.dht.Range;
 import org.apache.cassandra.dht.Splitter;
 import org.apache.cassandra.dht.Token;
-import org.apache.cassandra.locator.LocalStrategy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -425,7 +424,7 @@ public class AutoRepairUtils
        */
       if (Gossiper.instance.isAlive(node))
       {
-        UUID hostId = StorageService.instance.getHostIdForEndpoint(node);
+        UUID hostId = Gossiper.instance.getHostId(node);
         hostIdsInCurrentRing.add(hostId);
       }
       else
@@ -726,7 +725,6 @@ public class AutoRepairUtils
     {
       //find hostId from IP address
       UUID hostId = StorageService.instance.getTokenMetadata().getHostId(host);
-      //UUID hostId = StorageService.instance.getTokenMetadata().getHostId(host);
       hostIds.add(hostId);
       if (hostId != null)
       {
@@ -799,14 +797,8 @@ public class AutoRepairUtils
         repair = false;
       }
     }
-    if (replicationStrategy instanceof LocalStrategy)
-    {
-      repair = false;
-    }
     if (ks.getName().equalsIgnoreCase(SchemaConstants.TRACE_KEYSPACE_NAME))
     {
-      // by default, ignore the tables under system_traces as they do not have
-      // that much important data
       repair = false;
     }
     return repair;

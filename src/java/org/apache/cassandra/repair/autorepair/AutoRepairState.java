@@ -312,7 +312,7 @@ class PreviewRepairedState extends AutoRepairState
   {
     RepairOption option = new RepairOption(RepairParallelism.PARALLEL, primaryRangeOnly, false, false,
                                            AutoRepairService.instance.getAutoRepairConfig().getRepairThreads(repairType), ranges,
-                                           !ranges.isEmpty(), false, false, PreviewKind.REPAIRED, false, true, false, false);
+                                           !ranges.isEmpty(), false, false, PreviewKind.REPAIRED, true, true, false, false);
 
     option.getColumnFamilies().addAll(tables);
 

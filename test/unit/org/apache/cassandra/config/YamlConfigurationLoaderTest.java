@@ -105,8 +105,8 @@ public class YamlConfigurationLoaderTest
         assertEquals("You have wrongly defined a config parameter of abstract type DurationSpec, DataStorageSpec or DataRateSpec." +
                      "Please check the config docs, otherwise Cassandra won't be able to start with this parameter being set in cassandra.yaml.",
                      Arrays.stream(Config.class.getFields())
-                    .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                    .filter(isDurationSpec.or(isDataRateSpec).or(isDataStorageSpec)).count(), 0);
+                        .filter(f -> !Modifier.isStatic(f.getModifiers()))
+                        .filter(isDurationSpec.or(isDataRateSpec).or(isDataStorageSpec)).count(), 0);
     }
 
     @Test
@@ -114,12 +114,12 @@ public class YamlConfigurationLoaderTest
     {
         Config config = new Config();
         Map<String, Object> map = ImmutableMap.<String, Object>builder().put("storage_port", 123)
-                                                                        .put("commitlog_sync", Config.CommitLogSync.batch)
-                                                                        .put("seed_provider.class_name", "org.apache.cassandra.locator.SimpleSeedProvider")
-                                                                        .put("client_encryption_options.cipher_suites", Collections.singletonList("FakeCipher"))
-                                                                        .put("client_encryption_options.optional", false)
-                                                                        .put("client_encryption_options.enabled", true)
-                                                                        .build();
+                                              .put("commitlog_sync", Config.CommitLogSync.batch)
+                                              .put("seed_provider.class_name", "org.apache.cassandra.locator.SimpleSeedProvider")
+                                              .put("client_encryption_options.cipher_suites", Collections.singletonList("FakeCipher"))
+                                              .put("client_encryption_options.optional", false)
+                                              .put("client_encryption_options.enabled", true)
+                                              .build();
         Config updated = YamlConfigurationLoader.updateFromMap(map, true, config);
         assert updated == config : "Config pointers do not match";
         assertThat(config.storage_port).isEqualTo(123);

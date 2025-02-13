@@ -25,6 +25,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +35,11 @@ import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.net.HostAndPort;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.cassandra.io.IVersionedSerializer;
 import org.apache.cassandra.io.util.DataInputPlus;
@@ -64,6 +71,7 @@ public final class InetAddressAndPort extends InetSocketAddress implements Compa
     //Tools that might use this class also might not load database descriptor. Those tools are expected
     //to always override the defaults.
     static volatile int defaultPort = 7000;
+    private static final Logger logger = LoggerFactory.getLogger(InetAddressAndPort.class);
 
     public final byte[] addressBytes;
 
@@ -310,6 +318,53 @@ public final class InetAddressAndPort extends InetSocketAddress implements Compa
     {
         defaultPort = port;
     }
+
+    public static List<String> stringify(Iterable<InetAddressAndPort> endpoints)
+    {
+        return stringify(endpoints, true);
+    }
+
+    public static List<String> stringify(Iterable<InetAddressAndPort> endpoints, boolean withPort)
+    {
+        List<String> stringEndpoints = new ArrayList<>();
+        for (InetAddressAndPort ep : endpoints)
+        {
+            stringEndpoints.add(ep.getHostAddress(withPort));
+        }
+        return stringEndpoints;
+    }
+
+    /**
+     * Parses a comma-separated list of hosts to a set of {@link InetAddressAndPort}
+     *
+     * @param value       the comma-separated list of hosts to parse
+     * @param failOnError whether to fail when encountering an invalid hostname
+     * @return the set of parsed {@link InetAddressAndPort}
+     */
+    public static Set<InetAddressAndPort> parseHosts(String value, boolean failOnError)
+    {
+        Set<InetAddressAndPort> hosts = new HashSet<>();
+        for (String host : Splitter.on(',').split(value))
+        {
+            try
+            {
+                hosts.add(InetAddressAndPort.getByName(host));
+            }
+            catch (UnknownHostException e)
+            {
+                if (failOnError)
+                {
+                    throw new IllegalArgumentException("Failed to parse host: " + host, e);
+                }
+                else
+                {
+                    logger.warn("Invalid ip address {} from input={}", host, value);
+                }
+            }
+        }
+        return hosts;
+    }
+
 
     static int getDefaultPort()
     {

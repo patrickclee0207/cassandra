@@ -34,7 +34,6 @@ import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.db.ColumnFamilyStore;
 import org.apache.cassandra.db.Keyspace;
 import org.apache.cassandra.exceptions.ConfigurationException;
-import org.apache.cassandra.exceptions.InvalidRequestException;
 import org.apache.cassandra.io.sstable.format.SSTableReader;
 import org.apache.cassandra.service.StorageService;
 
@@ -104,11 +103,12 @@ public class SSTableRepairedAtTest extends CQLTester
   {
     try
     {
-      StorageService.instance.mutateSSTableRepairedState(true, false, TEST_KEYSPACE, Arrays.asList("MISSING_TABLE"));
+      StorageService.instance.mutateSSTableRepairedState(true, false, TEST_KEYSPACE, List.of("MISSING_TABLE"));
       fail("Expected an InvalidRequestException to be thrown");
     }
-    catch (InvalidRequestException e)
+    catch (RuntimeException e)
     {
+      assertEquals("Table MISSING_TABLE does not exist in keyspace " + TEST_KEYSPACE, e.getMessage());
       // Test passed
     }
   }

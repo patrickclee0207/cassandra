@@ -1445,7 +1445,7 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         AutoRepairService.setup();
         if (DatabaseDescriptor.getAutoRepairConfig().isAutoRepairSchedulingEnabled())
         {
-            logger.info("Enable auto-repair scheduling");
+            logger.info("Enabling auto-repair scheduling");
             AutoRepair.instance.setup();
         }
         logger.info("AutoRepair setup complete!");
@@ -7629,19 +7629,21 @@ public class StorageService extends NotificationBroadcasterSupport implements IE
         DatabaseDescriptor.setEnforceNativeDeadlineForHints(value);
     }
 
+    @Override
     public List<String> getTablesForKeyspace(String keyspace)
     {
         return Keyspace.open(keyspace).getColumnFamilyStores().stream().map(cfs -> cfs.name).collect(Collectors.toList());
     }
 
-    public List<String> mutateSSTableRepairedState(boolean repaired, boolean preview, String keyspace, List<String> tableNames) throws InvalidRequestException
+    @Override
+    public List<String> mutateSSTableRepairedState(boolean repaired, boolean preview, String keyspace, List<String> tableNames)
     {
         Map<String, ColumnFamilyStore> tables =  Keyspace.open(keyspace).getColumnFamilyStores()
-            .stream().collect(Collectors.toMap(c -> c.name, c -> c));
+                                                         .stream().collect(Collectors.toMap(c -> c.name, c -> c));
         for (String tableName : tableNames)
         {
             if (!tables.containsKey(tableName))
-                throw new InvalidRequestException("Table " + tableName + " does not exist in keyspace " + keyspace);
+                throw new RuntimeException("Table " + tableName + " does not exist in keyspace " + keyspace);
         }
 
         // only select SSTables that are unrepaired when repaired is true and vice versa
